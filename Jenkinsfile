@@ -1,4 +1,3 @@
-// For terraform
 pipeline {
     agent any
 
@@ -30,22 +29,23 @@ pipeline {
                       -var client_secret=%ARM_CLIENT_SECRET% ^
                       -var tenant_id=%ARM_TENANT_ID% ^
                       -var subscription_id=%ARM_SUBSCRIPTION_ID%
-                    '''
+                '''
             }
         }
 
         stage('Terraform Apply') {
             steps {
                 bat '''
-                terraform apply -auto-approve ^
-                  -var client_id=%ARM_CLIENT_ID% ^
-                  -var client_secret=%ARM_CLIENT_SECRET% ^
-                  -var tenant_id=%ARM_TENANT_ID% ^
-                  -var subscription_id=%ARM_SUBSCRIPTION_ID%
+                    terraform apply -auto-approve ^
+                      -var client_id=%ARM_CLIENT_ID% ^
+                      -var client_secret=%ARM_CLIENT_SECRET% ^
+                      -var tenant_id=%ARM_TENANT_ID% ^
+                      -var subscription_id=%ARM_SUBSCRIPTION_ID%
                 '''
             }
         }
-         stage('Build .NET App') {
+
+        stage('Build .NET App') {
             steps {
                 dir('WebApiJenkins') { // Adjust to your .NET project folder
                     bat 'dotnet publish -c Release -o publish'
@@ -53,14 +53,13 @@ pipeline {
             }
         }
 
-     stage('Deploy to Azure') {
+        stage('Deploy to Azure') {
             steps {
                 bat '''
-                powershell Compress-Archive -Path WebApiJenkins\\publish\\* -DestinationPath publish.zip -Force
-                az webapp deployment source config-zip --resource-group jenkins-simran-rg --name "jenkins-simran-app123" --src "publish.zip"
-
+                    powershell Compress-Archive -Path WebApiJenkins\\publish\\* -DestinationPath publish.zip -Force
+                    az webapp deploy --resource-group jenkins-simran-rg --name "jenkins-simran-app123" --src-path publish.zip --type zip
                 '''
             }
-        }   
-    }
+        }
+    }
 }

@@ -57,7 +57,7 @@ pipeline {
             steps {
                 bat '''
                     powershell Compress-Archive -Path WebApiJenkins\\publish\\* -DestinationPath publish.zip -Force
-                    az webapp deploy --resource-group jenkins-simran-rg --name "jenkins-simran-app123" --src-path publish.zip 
+                    az webapp deployment source config-zip --resource-group jenkins-simran-rg --name jenkins-simran-app123 --src publish.zip 
                 '''
             }
         }
